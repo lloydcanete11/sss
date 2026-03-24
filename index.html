@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShuttlePro — Badminton Shop</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Playfair+Display:ital@1&display=swap" rel="stylesheet"/>
+
+  <!-- ════════════════════════ CSS ════════════════════════ -->
+  <style>
+    /* ── Variables ── */
+    :root{
+      --black:#080808;--white:#f4f1eb;--gold:#d4a843;--gold2:#f0c96b;
+      --red:#c0392b;--mid:#1a1a1a;--card:#111;--card2:#161616;
+      --border:rgba(212,168,67,.22);--radius:7px;
+      --tran:.3s cubic-bezier(.4,0,.2,1);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--black);color:var(--white);font-family:'DM Sans',sans-serif;overflow-x:hidden;cursor:none;}
+
+    /* Cursor */
+    #cursor{width:13px;height:13px;background:var(--gold);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .08s,width .2s,height .2s;mix-blend-mode:difference;}
+    #cursor.big{width:38px;height:38px;}
+    ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-track{background:#0a0a0a;}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px;}
+
+    /* Noise */
+    body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");opacity:.55;}
+
+    /* ── NAV ── */
+    nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 3rem;background:rgba(8,8,8,.88);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);transition:padding var(--tran);}
+    nav.scrolled{padding:.7rem 3rem;}
+    .logo{font-family:'Bebas Neue',sans-serif;font-size:1.85rem;letter-spacing:.1em;color:var(--gold);text-decoration:none;}
+    .logo span{color:var(--white);}
+    .nav-links{display:flex;gap:2rem;list-style:none;}
+    .nav-links a{text-decoration:none;color:rgba(244,241,235,.55);font-size:.82rem;font-weight:500;letter-spacing:.07em;text-transform:uppercase;transition:color var(--tran);position:relative;}
+    .nav-links a::after{content:'';position:absolute;left:0;bottom:-3px;width:0;height:1px;background:var(--gold);transition:width var(--tran);}
+    .nav-links a:hover{color:var(--gold);}
+    .nav-links a:hover::after{width:100%;}
+    .nav-right{display:flex;align-items:center;gap:.9rem;}
+    .search-wrap{position:relative;}
+    .search-input{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--white);padding:.5rem 1rem .5rem 2.2rem;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none;width:180px;transition:border-color var(--tran),width var(--tran);}
+    .search-input:focus{border-color:var(--gold);width:220px;}
+    .search-input::placeholder{color:rgba(244,241,235,.3);}
+    .search-icon{position:absolute;left:.7rem;top:50%;transform:translateY(-50%);font-size:.85rem;pointer-events:none;opacity:.4;}
+    .auth-btn{background:none;border:1px solid var(--border);color:var(--white);padding:.48rem 1rem;border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;transition:all var(--tran);}
+    .auth-btn:hover{border-color:var(--gold);color:var(--gold);}
+    .cart-btn{position:relative;background:var(--gold);border:none;color:var(--black);padding:.5rem 1.1rem;border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;transition:all var(--tran);}
+    .cart-btn:hover{background:var(--gold2);transform:translateY(-1px);}
+    .cart-badge{position:absolute;top:-7px;right:-7px;background:var(--red);color:#fff;border-radius:50%;width:17px;height:17px;font-size:.6rem;display:flex;align-items:center;justify-content:center;font-weight:700;}
+    .cart-badge.pop{animation:badgePop .35s ease;}
+    @keyframes badgePop{0%,100%{transform:scale(1)}50%{transform:scale(1.6)}}
+
+    /* ── HERO ── */
+    #hero{min-height:100vh;display:flex;align-items:center;padding:0 3rem;position:relative;overflow:hidden;}
+    .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 65% 55% at 78% 50%,rgba(212,168,67,.09) 0%,transparent 70%),radial-gradient(ellipse 45% 75% at 12% 80%,rgba(192,57,43,.06) 0%,transparent 60%),#080808;}
+    .shuttle-anim{position:absolute;right:-40px;top:50%;transform:translateY(-50%);width:460px;opacity:.05;animation:float 7s ease-in-out infinite;}
+    @keyframes float{0%,100%{transform:translateY(-50%) rotate(-6deg)}50%{transform:translateY(-55%) rotate(5deg)}}
+    .hero-content{position:relative;z-index:1;max-width:600px;}
+    .hero-tag{display:inline-block;border:1px solid var(--gold);color:var(--gold);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;padding:.32rem .85rem;border-radius:2px;margin-bottom:1.4rem;animation:fadeUp .8s .1s both;}
+    h1.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.8rem,7.5vw,6.8rem);line-height:.93;letter-spacing:.02em;animation:fadeUp .8s .25s both;}
+    h1.hero-title em{font-style:italic;font-family:'Playfair Display',serif;color:var(--gold);display:block;}
+    .hero-sub{margin:1.5rem 0 2.3rem;color:rgba(244,241,235,.55);line-height:1.75;max-width:420px;animation:fadeUp .8s .4s both;font-size:.92rem;}
+    .hero-cta{display:flex;gap:1rem;flex-wrap:wrap;animation:fadeUp .8s .55s both;}
+    .btn-primary{background:var(--gold);color:var(--black);padding:.82rem 2.1rem;border-radius:var(--radius);border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.88rem;letter-spacing:.05em;text-transform:uppercase;transition:all var(--tran);text-decoration:none;display:inline-block;}
+    .btn-primary:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,168,67,.3);}
+    .btn-ghost{background:transparent;color:var(--white);padding:.82rem 2.1rem;border-radius:var(--radius);border:1px solid rgba(244,241,235,.22);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;font-size:.88rem;letter-spacing:.05em;text-transform:uppercase;transition:all var(--tran);text-decoration:none;display:inline-block;}
+    .btn-ghost:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-2px);}
+    .hero-stats{display:flex;gap:3rem;margin-top:3.5rem;animation:fadeUp .8s .7s both;}
+    .stat-num{font-family:'Bebas Neue',sans-serif;font-size:2.3rem;color:var(--gold);line-height:1;}
+    .stat-label{font-size:.72rem;color:rgba(244,241,235,.45);letter-spacing:.1em;text-transform:uppercase;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+
+    /* ── SECTION BASE ── */
+    section{position:relative;z-index:1;}
+    .section-header{text-align:center;margin-bottom:3rem;}
+    .section-tag{display:inline-block;font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);border-bottom:1px solid var(--gold);padding-bottom:.28rem;margin-bottom:.9rem;}
+    h2.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.2rem,3.8vw,3.4rem);letter-spacing:.04em;line-height:1;}
+
+    /* ── MARQUEE ── */
+    #brands{padding:3.5rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;}
+    .marquee-track{display:flex;gap:3.5rem;animation:marquee 18s linear infinite;white-space:nowrap;}
+    .marquee-track:hover{animation-play-state:paused;}
+    .brand-item{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.14em;color:rgba(244,241,235,.13);transition:color var(--tran);flex-shrink:0;cursor:default;}
+    .brand-item:hover{color:var(--gold);}
+    @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+    /* ── CATEGORIES ── */
+    #categories{padding:5.5rem 3rem;}
+    .cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1.1rem;}
+    .cat-card{border:1px solid var(--border);border-radius:var(--radius);padding:1.9rem 1.4rem;background:var(--card);cursor:pointer;transition:all var(--tran);text-align:center;position:relative;overflow:hidden;}
+    .cat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(212,168,67,.07),transparent);opacity:0;transition:opacity var(--tran);}
+    .cat-card:hover{border-color:var(--gold);transform:translateY(-5px);box-shadow:0 14px 34px rgba(0,0,0,.4);}
+    .cat-card:hover::before{opacity:1;}
+    .cat-icon{font-size:2.6rem;margin-bottom:.9rem;}
+    .cat-name{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.08em;}
+    .cat-count{font-size:.72rem;color:rgba(244,241,235,.4);margin-top:.3rem;}
+
+    /* ── PRODUCTS ── */
+    #products{padding:5.5rem 3rem;background:linear-gradient(180deg,#080808,#0f0f0f,#080808);}
+    .filter-bar{display:flex;gap:.65rem;flex-wrap:wrap;justify-content:center;margin-bottom:2.8rem;}
+    .filter-btn{background:none;border:1px solid var(--border);color:rgba(244,241,235,.5);padding:.48rem 1.25rem;border-radius:20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.78rem;letter-spacing:.05em;transition:all var(--tran);}
+    .filter-btn.active,.filter-btn:hover{background:var(--gold);border-color:var(--gold);color:var(--black);font-weight:700;}
+    .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:1.4rem;}
+    .product-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all var(--tran);cursor:pointer;}
+    .product-card:hover{transform:translateY(-6px);border-color:var(--gold);box-shadow:0 18px 40px rgba(0,0,0,.5);}
+    .product-card.hidden{display:none;}
+    .product-img{height:190px;display:flex;align-items:center;justify-content:center;font-size:4.8rem;background:linear-gradient(135deg,#161616,#101010);position:relative;overflow:hidden;}
+    .badge-new,.badge-sale{position:absolute;top:11px;left:11px;font-size:.62rem;font-weight:700;letter-spacing:.1em;padding:.22rem .55rem;border-radius:3px;text-transform:uppercase;}
+    .badge-new{background:var(--gold);color:var(--black);}
+    .badge-sale{background:var(--red);color:#fff;}
+    .product-info{padding:1.2rem;}
+    .product-brand{font-size:.67rem;letter-spacing:.17em;text-transform:uppercase;color:var(--gold);margin-bottom:.28rem;}
+    .product-name{font-weight:600;font-size:.93rem;margin-bottom:.45rem;}
+    .product-desc{font-size:.76rem;color:rgba(244,241,235,.42);line-height:1.65;margin-bottom:.95rem;}
+    .product-footer{display:flex;align-items:center;justify-content:space-between;}
+    .product-price{font-family:'Bebas Neue',sans-serif;font-size:1.38rem;color:var(--gold);}
+    .product-price .old{font-size:.82rem;color:rgba(244,241,235,.3);text-decoration:line-through;font-family:'DM Sans',sans-serif;margin-right:.35rem;}
+    .add-btn{background:var(--mid);border:1px solid var(--border);color:var(--white);width:35px;height:35px;border-radius:50%;cursor:pointer;font-size:1.15rem;display:flex;align-items:center;justify-content:center;transition:all var(--tran);}
+    .add-btn:hover{background:var(--gold);border-color:var(--gold);color:var(--black);transform:scale(1.15);}
+    .loading-spinner{text-align:center;padding:3rem;color:rgba(244,241,235,.3);font-size:.88rem;letter-spacing:.1em;}
+    .loading-spinner::after{content:'';display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;margin-left:.8rem;vertical-align:middle;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ── CART DRAWER ── */
+    .cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;opacity:0;pointer-events:none;transition:opacity var(--tran);}
+    .cart-overlay.open{opacity:1;pointer-events:all;}
+    .cart-drawer{position:fixed;top:0;right:-430px;width:410px;height:100vh;background:#0e0e0e;z-index:301;border-left:1px solid var(--border);display:flex;flex-direction:column;transition:right .4s cubic-bezier(.4,0,.2,1);}
+    .cart-drawer.open{right:0;}
+    .cart-header{display:flex;align-items:center;justify-content:space-between;padding:1.4rem 1.5rem;border-bottom:1px solid var(--border);}
+    .cart-header h3{font-family:'Bebas Neue',sans-serif;font-size:1.45rem;letter-spacing:.1em;}
+    .close-cart{background:none;border:none;color:var(--white);font-size:1.4rem;cursor:pointer;transition:color var(--tran);}
+    .close-cart:hover{color:var(--gold);}
+    .cart-items{flex:1;overflow-y:auto;padding:1rem 1.5rem;}
+    .cart-item{display:flex;gap:1rem;align-items:center;padding:.95rem 0;border-bottom:1px solid var(--border);animation:fadeUp .3s ease;}
+    .ci-icon{font-size:2rem;width:46px;text-align:center;flex-shrink:0;}
+    .ci-info{flex:1;}
+    .ci-name{font-weight:600;font-size:.86rem;}
+    .ci-brand{font-size:.68rem;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;}
+    .ci-price{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--white);}
+    .ci-remove{background:none;border:none;color:rgba(244,241,235,.3);cursor:pointer;font-size:.95rem;transition:color var(--tran);}
+    .ci-remove:hover{color:var(--red);}
+    .cart-empty{text-align:center;padding:3rem;color:rgba(244,241,235,.28);}
+    .cart-empty .empty-icon{font-size:2.8rem;margin-bottom:1rem;}
+    .cart-footer{padding:1.4rem 1.5rem;border-top:1px solid var(--border);}
+    .cart-total{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.1rem;}
+    .cart-total span:first-child{font-size:.8rem;color:rgba(244,241,235,.5);letter-spacing:.1em;text-transform:uppercase;}
+    .total-amt{font-family:'Bebas Neue',sans-serif;font-size:1.75rem;color:var(--gold);}
+
+    /* ── MODAL (Auth) ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity var(--tran);}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{background:#111;border:1px solid var(--border);border-radius:12px;padding:2.5rem;width:400px;max-width:90vw;animation:fadeUp .35s ease;}
+    .modal h3{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.08em;margin-bottom:.5rem;}
+    .modal p{color:rgba(244,241,235,.45);font-size:.83rem;margin-bottom:1.8rem;}
+    .form-group{margin-bottom:1.1rem;}
+    .form-group label{display:block;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.45rem;}
+    .form-input{width:100%;background:#0a0a0a;border:1px solid var(--border);color:var(--white);padding:.75rem 1rem;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color var(--tran);}
+    .form-input:focus{border-color:var(--gold);}
+    .form-input::placeholder{color:rgba(244,241,235,.25);}
+    .modal-footer{margin-top:1rem;text-align:center;font-size:.78rem;color:rgba(244,241,235,.4);}
+    .modal-footer a{color:var(--gold);cursor:pointer;text-decoration:none;}
+    .modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:rgba(244,241,235,.4);font-size:1.2rem;cursor:pointer;}
+    .auth-err{color:var(--red);font-size:.78rem;margin-bottom:.8rem;padding:.5rem .8rem;background:rgba(192,57,43,.12);border-radius:4px;border-left:2px solid var(--red);}
+
+    /* ── NEWSLETTER ── */
+    #newsletter{padding:5.5rem 3rem;text-align:center;}
+    .nl-box{max-width:540px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:3.2rem;}
+    .nl-box h2{font-family:'Bebas Neue',sans-serif;font-size:2.3rem;letter-spacing:.06em;margin-bottom:.7rem;}
+    .nl-box p{color:rgba(244,241,235,.48);font-size:.86rem;margin-bottom:1.8rem;line-height:1.7;}
+    .nl-form{display:flex;gap:.75rem;}
+    .nl-input{flex:1;background:#0a0a0a;border:1px solid var(--border);color:var(--white);padding:.75rem 1.1rem;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color var(--tran);}
+    .nl-input:focus{border-color:var(--gold);}
+    .nl-input::placeholder{color:rgba(244,241,235,.28);}
+
+    /* ── STATUS BAR ── */
+    #statusBar{position:fixed;bottom:1.8rem;left:50%;transform:translateX(-50%) translateY(90px);z-index:500;background:var(--gold);color:var(--black);padding:.75rem 1.8rem;border-radius:30px;font-weight:700;font-size:.83rem;letter-spacing:.04em;transition:transform .42s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none;}
+    #statusBar.show{transform:translateX(-50%) translateY(0);}
+    #statusBar.error{background:var(--red);color:#fff;}
+
+    /* ── API STATUS ── */
+    .api-dot{width:8px;height:8px;border-radius:50%;background:rgba(244,241,235,.2);display:inline-block;margin-right:.4rem;transition:background .4s;}
+    .api-dot.online{background:#27ae60;box-shadow:0 0 6px rgba(39,174,96,.6);}
+    .api-dot.offline{background:var(--red);}
+    .api-label{font-size:.68rem;color:rgba(244,241,235,.35);letter-spacing:.1em;}
+
+    /* ── FOOTER ── */
+    footer{padding:2.5rem 3rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1.5rem;}
+    .footer-logo{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold);}
+    .footer-copy{font-size:.75rem;color:rgba(244,241,235,.28);}
+    .footer-links{display:flex;gap:1.4rem;}
+    .footer-links a{font-size:.75rem;color:rgba(244,241,235,.35);text-decoration:none;transition:color var(--tran);}
+    .footer-links a:hover{color:var(--gold);}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:768px){
+      nav{padding:1rem 1.4rem;}
+      nav.scrolled{padding:.7rem 1.4rem;}
+      .nav-links,.search-wrap{display:none;}
+      #hero,#categories,#products,#newsletter{padding-left:1.4rem;padding-right:1.4rem;}
+      h1.hero-title{font-size:3.3rem;}
+      .hero-stats{gap:1.4rem;}
+      .cart-drawer{width:100%;right:-100%;}
+      .nl-form{flex-direction:column;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div id="cursor"></div>
+
+<!-- Toast / Status bar -->
+<div id="statusBar">✓ Done!</div>
+
+<!-- Cart Overlay -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+
+<!-- Cart Drawer -->
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <h3>Your Bag</h3>
+    <button class="close-cart" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total">
+      <span>Total</span>
+      <span class="total-amt" id="cartTotal">₱0</span>
+    </div>
+    <button class="btn-primary" style="width:100%" onclick="checkout()">Checkout →</button>
+  </div>
+</div>
+
+<!-- Auth Modal -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 id="modalTitle">Sign In</h3>
+    <p id="modalSub">Welcome back, champion.</p>
+    <div id="authErr" class="auth-err" style="display:none"></div>
+    <div id="nameGroup" class="form-group" style="display:none">
+      <label>Full Name</label>
+      <input class="form-input" id="authName" type="text" placeholder="Your name"/>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input class="form-input" id="authEmail" type="email" placeholder="you@email.com"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input class="form-input" id="authPass" type="password" placeholder="••••••••"/>
+    </div>
+    <button class="btn-primary" style="width:100%;margin-top:.5rem" onclick="submitAuth()">Sign In</button>
+    <div class="modal-footer" style="margin-top:1rem">
+      <span id="modalSwitch">Don't have an account? <a onclick="toggleAuthMode()">Register</a></span>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#hero" class="logo">Shuttle<span>Pro</span></a>
+  <ul class="nav-links">
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#categories">Categories</a></li>
+    <li><a href="#products">Shop</a></li>
+    <li><a href="#newsletter">Deals</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="searchInput" type="text" placeholder="Search products…" oninput="debounceSearch(this.value)"/>
+    </div>
+    <button class="auth-btn" id="authToggleBtn" onclick="openModal()">Sign In</button>
+    <button class="cart-btn" onclick="openCart()">
+      🛒 Cart
+      <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <svg class="shuttle-anim" viewBox="0 0 300 600" fill="white" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="150" cy="520" rx="55" ry="30"/>
+    <rect x="143" y="100" width="14" height="430" rx="6"/>
+    <ellipse cx="150" cy="90" rx="70" ry="90" fill="none" stroke="white" stroke-width="10"/>
+    <line x1="80" y1="90" x2="150" y2="100" stroke="white" stroke-width="5"/>
+    <line x1="220" y1="90" x2="150" y2="100" stroke="white" stroke-width="5"/>
+    <line x1="95" y1="30" x2="150" y2="100" stroke="white" stroke-width="5"/>
+    <line x1="205" y1="30" x2="150" y2="100" stroke="white" stroke-width="5"/>
+    <line x1="150" y1="5" x2="150" y2="100" stroke="white" stroke-width="5"/>
+  </svg>
+  <div class="hero-content">
+    <div class="hero-tag">🏸 New Season Collection</div>
+    <h1 class="hero-title">Play Like <em>A Champion</em></h1>
+    <p class="hero-sub">Premium badminton equipment for players who demand more. Rackets, shuttles, footwear &amp; gear — powered by a real backend.</p>
+    <div class="hero-cta">
+      <a href="#products" class="btn-primary">Shop Now →</a>
+      <a href="#categories" class="btn-ghost">Browse Categories</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="stat-num" id="statProducts">—</div><div class="stat-label">Products</div></div>
+      <div><div class="stat-num" id="statOrders">—</div><div class="stat-label">Orders</div></div>
+      <div><div class="stat-num">4.9★</div><div class="stat-label">Rating</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- BRANDS -->
+<div id="brands">
+  <div class="marquee-track">
+    <span class="brand-item">YONEX</span><span class="brand-item">LI-NING</span><span class="brand-item">VICTOR</span>
+    <span class="brand-item">CARLTON</span><span class="brand-item">BABOLAT</span><span class="brand-item">ASHAWAY</span>
+    <span class="brand-item">RSL</span><span class="brand-item">APACS</span><span class="brand-item">FLEET</span>
+    <span class="brand-item">KAWASAKI</span>
+    <span class="brand-item">YONEX</span><span class="brand-item">LI-NING</span><span class="brand-item">VICTOR</span>
+    <span class="brand-item">CARLTON</span><span class="brand-item">BABOLAT</span><span class="brand-item">ASHAWAY</span>
+    <span class="brand-item">RSL</span><span class="brand-item">APACS</span><span class="brand-item">FLEET</span>
+    <span class="brand-item">KAWASAKI</span>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<section id="categories">
+  <div class="section-header">
+    <div class="section-tag">Browse</div>
+    <h2 class="section-title">Shop By Category</h2>
+  </div>
+  <div class="cat-grid">
+    <div class="cat-card" onclick="filterProducts('racket',null)"><div class="cat-icon">🏸</div><div class="cat-name">Rackets</div></div>
+    <div class="cat-card" onclick="filterProducts('shuttle',null)"><div class="cat-icon">🪶</div><div class="cat-name">Shuttlecocks</div></div>
+    <div class="cat-card" onclick="filterProducts('shoes',null)"><div class="cat-icon">👟</div><div class="cat-name">Footwear</div></div>
+    <div class="cat-card" onclick="filterProducts('bag',null)"><div class="cat-icon">🎒</div><div class="cat-name">Bags</div></div>
+    <div class="cat-card" onclick="filterProducts('string',null)"><div class="cat-icon">🎵</div><div class="cat-name">Strings</div></div>
+    <div class="cat-card" onclick="filterProducts('all',null)"><div class="cat-icon">✨</div><div class="cat-name">All Items</div></div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="products">
+  <div class="section-header">
+    <div class="section-tag">Collection</div>
+    <h2 class="section-title">Featured Products</h2>
+    <div style="margin-top:.8rem;display:flex;align-items:center;justify-content:center;gap:.5rem">
+      <span class="api-dot" id="apiDot"></span>
+      <span class="api-label" id="apiLabel">Connecting to backend…</span>
+    </div>
+  </div>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterProducts('all',this)">All</button>
+    <button class="filter-btn" onclick="filterProducts('racket',this)">Rackets</button>
+    <button class="filter-btn" onclick="filterProducts('shuttle',this)">Shuttlecocks</button>
+    <button class="filter-btn" onclick="filterProducts('shoes',this)">Shoes</button>
+    <button class="filter-btn" onclick="filterProducts('bag',this)">Bags</button>
+    <button class="filter-btn" onclick="filterProducts('string',this)">Strings</button>
+  </div>
+  <div class="products-grid" id="productsGrid">
+    <div class="loading-spinner" style="grid-column:1/-1">Loading products from backend</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">ShuttlePro</div>
+  <div class="footer-copy">© 2025 ShuttlePro. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="#">Privacy</a><a href="#">Returns</a><a href="#">Contact</a>
+  </div>
+</footer>
+
+<!-- ════════════════════════ JAVASCRIPT ════════════════════════ -->
+<script>
+/* ─── Config ─── */
+const API = "http://localhost:5000/api";
+
+/* Generate a session ID if none exists */
+let SESSION = localStorage.getItem("sp_session");
+if (!SESSION) {
+  SESSION = "sess_" + Math.random().toString(36).slice(2,11);
+  localStorage.setItem("sp_session", SESSION);
+}
+
+let currentUser = JSON.parse(localStorage.getItem("sp_user") || "null");
+let authMode    = "login"; // 'login' | 'register'
+let searchTimer = null;
+
+/* ─── Cursor ─── */
+const cursor = document.getElementById("cursor");
+document.addEventListener("mousemove", e => {
+  cursor.style.left = e.clientX + "px";
+  cursor.style.top  = e.clientY + "px";
+});
+document.addEventListener("mousedown", () => cursor.classList.add("big"));
+document.addEventListener("mouseup",   () => cursor.classList.remove("big"));
+document.querySelectorAll("a,button,.product-card,.cat-card").forEach(el => {
+  el.addEventListener("mouseenter", () => cursor.classList.add("big"));
+  el.addEventListener("mouseleave", () => cursor.classList.remove("big"));
+});
+
+/* ─── Navbar ─── */
+window.addEventListener("scroll", () =>
+  document.getElementById("navbar").classList.toggle("scrolled", scrollY > 50)
+);
+
+/* ─── API Helper ─── */
+async function api(path, method = "GET", body = null) {
+  const opts = {
+    method,
+    headers: { "Content-Type": "application/json" },
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API + path, opts);
+  return res.json();
+}
+
+/* ─── API Status check ─── */
+async function checkAPI() {
+  try {
+    const data = await api("/stats");
+    document.getElementById("apiDot").classList.add("online");
+    document.getElementById("apiLabel").textContent = "Backend connected ✓";
+    document.getElementById("statProducts").textContent = data.products + "+";
+    document.getElementById("statOrders").textContent   = data.orders;
+  } catch {
+    document.getElementById("apiDot").classList.add("offline");
+    document.getElementById("apiLabel").textContent = "offline — using demo mode";
+  }
+}
+
+/* ─── Products ─── */
+async function loadProducts(cat = "all") {
+  const grid = document.getElementById("productsGrid");
+  grid.innerHTML = `<div class="loading-spinner" style="grid-column:1/-1">Loading from backend</div>`;
+  try {
+    const url = cat === "all" ? "/products" : `/products?category=${cat}`;
+    const products = await api(url);
+    renderProductCards(products);
+  } catch {
+    // Fallback demo data when backend is offline
+    renderProductCards(DEMO_PRODUCTS.filter(p => cat === "all" || p.category === cat));
+  }
+}
+
+function renderProductCards(products) {
+  const grid = document.getElementById("productsGrid");
+  if (!products.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem;color:rgba(244,241,235,.3)">No products found.</div>`;
+    return;
+  }
+  grid.innerHTML = products.map(p => `
+    <div class="product-card" data-cat="${p.category}">
+      <div class="product-img">
+        ${p.badge === "new"  ? `<span class="badge-new">New</span>`  : ""}
+        ${p.badge === "sale" ? `<span class="badge-sale">Sale</span>` : ""}
+        ${p.icon || "🏸"}
+      </div>
+      <div class="product-info">
+        <div class="product-brand">${p.brand}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-desc">${p.description || ""}</div>
+        <div class="product-footer">
+          <div class="product-price">
+            ${p.old_price ? `<span class="old">₱${Number(p.old_price).toLocaleString()}</span>` : ""}
+            ₱${Number(p.price).toLocaleString()}
+          </div>
+          <button class="add-btn" onclick="addToCart(${p.id}, event)" title="Add to cart">+</button>
+        </div>
+      </div>
+    </div>`).join("");
+}
+
+/* ─── Filter ─── */
+function filterProducts(cat, btnEl) {
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  if (btnEl) btnEl.classList.add("active");
+  loadProducts(cat);
+  if (!btnEl) document.getElementById("products").scrollIntoView({ behavior: "smooth" });
+}
+
+/* ─── Search ─── */
+function debounceSearch(q) {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(async () => {
+    if (!q.trim()) { loadProducts(); return; }
+    try {
+      const products = await api(`/products/search?q=${encodeURIComponent(q)}`);
+      renderProductCards(products);
+    } catch {
+      const filtered = DEMO_PRODUCTS.filter(p =>
+        p.name.toLowerCase().includes(q.toLowerCase()) ||
+        p.brand.toLowerCase().includes(q.toLowerCase())
+      );
+      renderProductCards(filtered);
+    }
+  }, 320);
+}
+
+/* ─── Cart ─── */
+async function addToCart(productId, e) {
+  e.stopPropagation();
+  try {
+    await api(`/cart/${SESSION}/add`, "POST", { product_id: productId, qty: 1 });
+    showStatus("Added to cart! 🏸");
+    refreshCartBadge();
+  } catch {
+    showStatus("Error — backend offline", true);
+  }
+}
+
+async function refreshCartBadge() {
+  try {
+    const cart = await api(`/cart/${SESSION}`);
+    const badge = document.getElementById("cartBadge");
+    badge.textContent = cart.count;
+    badge.classList.remove("pop"); void badge.offsetWidth; badge.classList.add("pop");
+  } catch {}
+}
+
+async function openCart() {
+  document.getElementById("cartDrawer").classList.add("open");
+  document.getElementById("cartOverlay").classList.add("open");
+  await renderCart();
+}
+
+function closeCart() {
+  document.getElementById("cartDrawer").classList.remove("open");
+  document.getElementById("cartOverlay").classList.remove("open");
+}
+
+async function renderCart() {
+  const el  = document.getElementById("cartItems");
+  const ftr = document.getElementById("cartFooter");
+  el.innerHTML = `<div style="text-align:center;padding:2rem;color:rgba(244,241,235,.3)">Loading…</div>`;
+  try {
+    const cart = await api(`/cart/${SESSION}`);
+    if (!cart.items.length) {
+      el.innerHTML = `<div class="cart-empty"><div class="empty-icon">🏸</div><p>Your bag is empty.<br>Start smashing deals!</p></div>`;
+      ftr.style.display = "none";
+      return;
+    }
+    ftr.style.display = "block";
+    el.innerHTML = cart.items.map(item => `
+      <div class="cart-item">
+        <div class="ci-icon">${item.icon}</div>
+        <div class="ci-info">
+          <div class="ci-name">${item.name} ${item.qty > 1 ? `<span style="color:var(--gold);font-size:.72rem">×${item.qty}</span>` : ""}</div>
+          <div class="ci-brand">${item.brand}</div>
+          <div class="ci-price">₱${(item.price * item.qty).toLocaleString()}</div>
+        </div>
+        <button class="ci-remove" onclick="removeFromCart(${item.id})">✕</button>
+      </div>`).join("");
+    document.getElementById("cartTotal").textContent = "₱" + cart.total.toLocaleString();
+  } catch {
+    el.innerHTML = `<div class="cart-empty"><div class="empty-icon">⚠️</div><p>Backend offline.</p></div>`;
+    ftr.style.display = "none";
+  }
+}
+
+async function removeFromCart(cartId) {
+  await api(`/cart/${SESSION}/remove/${cartId}`, "DELETE");
+  await renderCart();
+  await refreshCartBadge();
+}
+
+async function checkout() {
+  const email = currentUser ? currentUser.email : "guest@shuttlepro.ph";
+  try {
+    const result = await api("/orders", "POST", { session_id: SESSION, email });
+    if (result.success) {
+      showStatus(`Order placed! Total: ₱${result.total.toLocaleString()} 🎉`);
+      closeCart();
+      await refreshCartBadge();
+    } else {
+      showStatus(result.message, true);
+    }
+  } catch {
+    showStatus("Backend offline — checkout unavailable", true);
+  }
+}
+
+/* ─── Auth ─── */
+function openModal() {
+  document.getElementById("authModal").classList.add("open");
+  document.getElementById("authErr").style.display = "none";
+}
+function closeModal() {
+  document.getElementById("authModal").classList.remove("open");
+}
+function toggleAuthMode() {
+  authMode = authMode === "login" ? "register" : "login";
+  const isReg = authMode === "register";
+  document.getElementById("modalTitle").textContent = isReg ? "Create Account" : "Sign In";
+  document.getElementById("modalSub").textContent   = isReg ? "Join the champion's circle." : "Welcome back, champion.";
+  document.getElementById("nameGroup").style.display = isReg ? "block" : "none";
+  document.querySelector("#authModal .btn-primary").textContent = isReg ? "Register" : "Sign In";
+  document.getElementById("modalSwitch").innerHTML  = isReg
+    ? `Already have an account? <a onclick="toggleAuthMode()">Sign In</a>`
+    : `Don't have an account? <a onclick="toggleAuthMode()">Register</a>`;
+  document.getElementById("authErr").style.display = "none";
+}
+
+async function submitAuth() {
+  const email = document.getElementById("authEmail").value;
+  const pass  = document.getElementById("authPass").value;
+  const errEl = document.getElementById("authErr");
+  errEl.style.display = "none";
+  try {
+    let result;
+    if (authMode === "register") {
+      const name = document.getElementById("authName").value;
+      result = await api("/auth/register", "POST", { name, email, password: pass });
+    } else {
+      result = await api("/auth/login", "POST", { email, password: pass });
+    }
+    if (result.success) {
+      currentUser = result.user || { email };
+      localStorage.setItem("sp_user", JSON.stringify(currentUser));
+      document.getElementById("authToggleBtn").textContent = currentUser.name || "Account";
+      closeModal();
+      showStatus(authMode === "register" ? "Account created! 🎉" : `Welcome back, ${currentUser.name}!`);
+    } else {
+      errEl.textContent = result.message;
+      errEl.style.display = "block";
+    }
+  } catch {
+    errEl.textContent = "offline — auth unavailable.";
+    errEl.style.display = "block";
+  }
+}
+
+// Close modal on overlay click
+document.getElementById("authModal").addEventListener("click", function(e){
+  if (e.target === this) closeModal();
+});
+
+/* ─── Newsletter ─── */
+async function subscribeNL() {
+  const email = document.getElementById("nlEmail").value;
+  try {
+    const result = await api("/newsletter", "POST", { email });
+    if (result.success) {
+      showStatus(result.message);
+      document.getElementById("nlEmail").value = "";
+    } else {
+      showStatus(result.message, true);
+    }
+  } catch {
+    showStatus("Backend offline — try again later", true);
+  }
+}
+
+/* ─── Status Toast ─── */
+let statusTimer;
+function showStatus(msg, isError = false) {
+  const el = document.getElementById("statusBar");
+  el.textContent = (isError ? "⚠️ " : "✓ ") + msg;
+  el.classList.toggle("error", isError);
+  el.classList.add("show");
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => el.classList.remove("show"), 3000);
+}
+
+/* ─── Demo fallback products (when backend offline) ─── */
+const DEMO_PRODUCTS = [
+  { id:1, name:"Astrox 99 Pro",    brand:"Yonex",  category:"racket",  price:8990, old_price:10990, badge:"new",  icon:"🏸", description:"Head-heavy attacking racket." },
+  { id:2, name:"Windstorm 72",     brand:"Victor", category:"racket",  price:5490, old_price:6990,  badge:"sale", icon:"🏸", description:"Extra-slim fast-swing racket." },
+  { id:3, name:"Aeronaut 9000",    brand:"Li-Ning",category:"racket",  price:7200, old_price:null,  badge:null,   icon:"🏸", description:"Carbon-fiber all-court racket." },
+  { id:4, name:"AS-9 Feather",     brand:"RSL",    category:"shuttle", price:650,  old_price:null,  badge:"new",  icon:"🪶", description:"Grade-A goose feather shuttle." },
+  { id:5, name:"Mavis 350",        brand:"Yonex",  category:"shuttle", price:380,  old_price:null,  badge:null,   icon:"🪶", description:"Durable nylon shuttlecock." },
+  { id:6, name:"SHB 65Z III",      brand:"Yonex",  category:"shoes",   price:6800, old_price:null,  badge:"new",  icon:"👟", description:"Ultra-light court shoe." },
+  { id:7, name:"Great One",        brand:"Victor", category:"shoes",   price:5200, old_price:6200,  badge:"sale", icon:"👟", description:"Excellent grip and shock absorption." },
+  { id:8, name:"Pro Racket Bag 9R",brand:"Yonex",  category:"bag",     price:3200, old_price:null,  badge:null,   icon:"🎒", description:"Holds 9 rackets, thermal lining." },
+  { id:9, name:"BG80 Power",       brand:"Yonex",  category:"string",  price:320,  old_price:null,  badge:null,   icon:"🎵", description:"High-tension smashing string." },
+  { id:10,name:"VBS-66N Nano",     brand:"Victor", category:"string",  price:280,  old_price:null,  badge:"new",  icon:"🎵", description:"Control-focused string." },
+];
+
+/* ─── Restore user session ─── */
+if (currentUser) {
+  document.getElementById("authToggleBtn").textContent = currentUser.name || "Account";
+}
+
+/* ─── Init ─── */
+(async function init() {
+  await checkAPI();
+  await loadProducts();
+  await refreshCartBadge();
+})();
+</script>
+</body>
+</html>
